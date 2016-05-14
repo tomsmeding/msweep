@@ -194,7 +194,8 @@ void board_draw(Board *bd){
 			case 2: printf("   %d bombs",bd->nbombs); break;
 			case 3: printf("   %d flag%s placed ",bd->nflags,bd->nflags==1?"":"s"); break;
 			case 5: printf("   'f' to flag, <space> to open"); break;
-			case 6: printf("   arrow keys to move, 'q' to quit"); break;
+			case 6: printf("   arrow keys to move, 'r' to restart"); break;
+			case 7: printf("   'q' to quit"); break;
 		}
 		putchar('\n');
 	}
@@ -312,6 +313,10 @@ int main(void){
 						break;
 					case 'f':
 						board_flag(bd);
+						break;
+					case 'r':
+						board_destroy(bd);
+						bd=board_make(WIDTH,HEIGHT);
 						break;
 					case ' ':
 						if(!board_open(bd))break;
