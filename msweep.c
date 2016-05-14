@@ -224,7 +224,7 @@ void board_flood(Board *bd,int x,int y){
 bool board_open(Board *bd){
 	Data *data=bd->data+(bd->w*bd->cury+bd->curx);
 	if(data->flag||data->open){
-		prflush("\x07");
+		prflush("\x07"); // bel
 		return false;
 	}
 	if(data->bomb)return true;
