@@ -173,7 +173,7 @@ void board_drawcell(Board *bd,int x,int y){
 	if(data->flag)putchar('#');
 	// else if(data->bomb)putchar(','); //DEBUG
 	else if(!data->open)putchar('.');
-	else if(data->count==0)putchar('-');
+	else if(data->count==0)putchar(' ');
 	else putchar('0'+data->count);
 }
 
