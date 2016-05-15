@@ -4,9 +4,9 @@
 #include <sys/time.h>
 #include <termios.h>
 
-#define NBOMBS (10)
-#define WIDTH (9)
-#define HEIGHT (9)
+#define DEF_NBOMBS (10)
+#define DEF_WIDTH (9)
+#define DEF_HEIGHT (9)
 
 #define prflush(...) do { printf(__VA_ARGS__); fflush(stdout); } while(0)
 
@@ -118,14 +118,14 @@ typedef struct Board{
 	int nbombs,nflags,nopen;
 } Board;
 
-Board* board_make(int w, int h) {
+Board* board_make(int w, int h, int nbombs) {
 	Board *bd = malloc(sizeof(Board));
 	bd->w = w;
 	bd->h = h;
 	bd->data = malloc(w*h*sizeof(Data));
 	bd->curx = 0;
 	bd->cury = 0;
-	bd->nbombs = NBOMBS;
+	bd->nbombs = nbombs;
 	bd->nflags = 0;
 	bd->nopen = 0;
 
@@ -256,8 +256,8 @@ bool board_win(Board *bd) {
 }
 
 
-void prompt_quit() {
-	gotoxy(0, HEIGHT+2);
+void prompt_quit(int height) {
+	gotoxy(0, height);
 	prflush("Really quit? [y/N] ");
 	Key key;
 	getkey(&key);
@@ -268,8 +268,8 @@ void prompt_quit() {
 	}
 }
 
-bool prompt_playagain(const char *msg) {
-	gotoxy(0, HEIGHT+2);
+bool prompt_playagain(const char *msg, int height) {
+	gotoxy(0, height);
 	prflush("\x1B[7m%s\x1B[0m\nPlay again? [y/N] ", msg);
 	Key key;
 	getkey(&key);
@@ -287,7 +287,7 @@ void signalend(int sig) {
 	exit(1);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	srand(tv.tv_sec*1000000ULL+tv.tv_usec);
@@ -296,15 +296,27 @@ int main(void) {
 	atexit(endscreen);
 	signal(SIGINT, signalend);
 
-	Board *bd=board_make(WIDTH, HEIGHT);
+	int width = DEF_WIDTH;
+	int height = DEF_HEIGHT;
+	int nbombs = DEF_NBOMBS;
+	for (int i = 1; i < argc; i++) {
+		int val = atoi(argv[i]);
+		switch (i) {
+		case 1: width = val;
+		case 2: height = val;
+		case 3: nbombs = val;
+		}
+	}
+
+	Board *bd=board_make(width, height, nbombs);
 	Key key;
 	bool quit = false;
 	while (!quit) {
 		board_draw(bd);
 		if (board_win(bd)) {
-			if (!prompt_playagain("You win!"))  break;
+			if (!prompt_playagain("You win!", height + 2))  break;
 			board_destroy(bd);
-			bd=board_make(WIDTH, HEIGHT);
+			bd=board_make(width, height, nbombs);
 			continue;
 		}
 		getkey(&key);
@@ -315,24 +327,24 @@ int main(void) {
 		case KCHAR:
 			switch (key.ch) {
 			case 'q':
-				prompt_quit();
+				prompt_quit(height + 2);
 				break;
 			case 'f':
 				board_flag(bd);
 				break;
 			case 'r':
 				board_destroy(bd);
-				bd=board_make(WIDTH, HEIGHT);
+				bd=board_make(width, height, nbombs);
 				break;
 			case ' ':
 				if (!board_open(bd)) break;
 				board_revealbombs(bd);
-				if (!prompt_playagain("BOOM!"))  {
+				if (!prompt_playagain("BOOM!", height + 2))  {
 					quit = true;
 					break;
 				}
 				board_destroy(bd);
-				bd=board_make(WIDTH, HEIGHT);
+				bd=board_make(width, height, nbombs);
 				break;
 			}
 			break;
