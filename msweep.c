@@ -1,3 +1,7 @@
+// msweep: Simple terminal minesweeper
+// original by tomsmeding (http://www.tomsmeding.com)
+// fork by lieuwex (http://www.lieuwe.xyz)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
