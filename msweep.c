@@ -67,9 +67,17 @@ typedef struct Key Key;
 void getkey(Key *key){
 	char c=getchar();
 	if(c!=27){
-		key->type=KCHAR;
-		key->ch=c;
-		return;
+		key->type = KARROW;
+		switch (c) {
+		case 'h': key->dir = LEFT; return;
+		case 'j': key->dir = DOWN; return;
+		case 'k': key->dir = UP; return;
+		case 'l': key->dir = RIGHT; return;
+		default:
+			key->type=KCHAR;
+			key->ch=c;
+			return;
+		}
 	}
 	c=getchar();
 	if(c!='['){
