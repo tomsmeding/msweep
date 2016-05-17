@@ -1,5 +1,5 @@
-CXX = gcc
-CXXFLAGS = -Wall -Wextra -O2
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -std=c99
 BIN = msweep
 
 src_files = $(wildcard *.c)
@@ -15,4 +15,4 @@ remake: clean all
 
 
 $(BIN): $(src_files)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
