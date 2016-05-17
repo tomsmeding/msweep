@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <sys/time.h>
 #include <termios.h>
+#include <signal.h>
 
 #define DEF_NBOMBS (10)
 #define DEF_WIDTH (9)
@@ -24,8 +25,13 @@ void initscreen(void){
 	tcgetattr(0,&tios_bak);
 	tios=tios_bak;
 	tios.c_lflag&=~(
-		ECHO|ECHOE|ECHOKE //no echo of normal characters, erasing and killing
+		ECHO|ECHOE //no echo of normal characters, erasing
+#ifdef ECHOKE
+		|ECHOKE //...and killing
+#endif
+#ifdef ECHOCTL
 		|ECHOCTL //don't visibly echo control characters (^V etc.)
+#endif
 		|ECHONL //don't even echo a newline
 		|ICANON //disable canonical mode
 #ifdef NOKERNINFO
