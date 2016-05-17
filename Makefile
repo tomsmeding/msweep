@@ -1,12 +1,11 @@
-CXX = gcc
-CXXFLAGS = -O3 -Wall -Wextra
-SOURCE = $(wildcard *.c)
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -std=c99
 BIN = msweep
 
 .PHONY: install uninstall clean remake all
 
 $(BIN): msweep.c
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 install: $(BIN)
 	install $(BIN) /usr/local/bin
