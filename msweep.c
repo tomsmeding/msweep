@@ -9,7 +9,6 @@
 #include <termios.h>
 #include <signal.h>
 
-#define DEF_NBOMBS (10)
 #define DEF_WIDTH (9)
 #define DEF_HEIGHT (9)
 
@@ -308,7 +307,7 @@ int main(int argc, char **argv) {
 
 	int width = DEF_WIDTH;
 	int height = DEF_HEIGHT;
-	int nbombs = DEF_NBOMBS;
+	int nbombs = -1;
 	for (int i = 1; i < argc; i++) {
 		int val = atoi(argv[i]);
 		switch (i) {
@@ -316,6 +315,9 @@ int main(int argc, char **argv) {
 		case 2: height = val; break;
 		case 3: nbombs = val; break;
 		}
+	}
+	if (nbombs == -1) {
+		nbombs = .123 * width * height;
 	}
 
 	Board *bd=board_make(width, height, nbombs);
