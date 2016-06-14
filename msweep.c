@@ -312,9 +312,9 @@ int main(int argc, char **argv) {
 	for (int i = 1; i < argc; i++) {
 		int val = atoi(argv[i]);
 		switch (i) {
-		case 1: width = val;
-		case 2: height = val;
-		case 3: nbombs = val;
+		case 1: width = val; break;
+		case 2: height = val; break;
+		case 3: nbombs = val; break;
 		}
 	}
 
