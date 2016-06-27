@@ -2,6 +2,7 @@
 // original by tomsmeding (http://www.tomsmeding.com)
 // fork by lieuwex (http://www.lieuwe.xyz)
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -319,6 +320,8 @@ int main(int argc, char **argv) {
 	if (nbombs == -1) {
 		nbombs = .123 * width * height;
 	}
+
+	assert(nbombs <= width*height);
 
 	Board *bd=board_make(width, height, nbombs);
 	Key key;
