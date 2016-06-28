@@ -262,7 +262,7 @@ void board_revealbombs(Board *bd) {
 }
 
 bool board_win(Board *bd) {
-	return bd->nflags==bd->nbombs&&bd->nopen+bd->nflags==bd->w*bd->h;
+	return bd->nopen == bd->w*bd->h - bd->nbombs;
 }
 
 
