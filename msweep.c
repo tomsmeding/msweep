@@ -62,18 +62,24 @@ void gotoxy(int x, int y) {
 
 typedef enum Keytype {
 	KARROW,
-	KCHAR
+	KCHAR,
+	KNUM
 } Keytype;
 
 typedef struct Key {
 	Keytype type;
 	char ch;
 	Direction dir;
+	unsigned short num;
 } Key;
 
 void getkey(Key *key) {
 	char c = getchar();
-	if(c != 27) {
+	if (c >= 48 && c <= 57) {
+		key->type = KNUM;
+		key->num = c - 48;
+		return;
+	} else if (c != 27) {
 		key->type = KARROW;
 		switch (c) {
 		case 'h': key->dir = LEFT; return;
@@ -346,6 +352,7 @@ int main(int argc, char **argv) {
 	Board *bd=board_make(width, height, nbombs);
 	Key key;
 	bool quit = false;
+	int repeat = 1;
 	while (!quit) {
 		board_draw(bd);
 		if (board_win(bd)) {
@@ -358,8 +365,16 @@ int main(int argc, char **argv) {
 		}
 		getkey(&key);
 		switch (key.type) {
+		case KNUM:
+			if (key.num > 1) {
+				repeat = key.num;
+			}
+			break;
 		case KARROW:
-			board_shiftcursor(bd, key.dir);
+			for (int i = 0; i < repeat; i++) {
+				board_shiftcursor(bd, key.dir);
+			}
+			repeat = 1;
 			break;
 		case KCHAR:
 			switch (key.ch) {
