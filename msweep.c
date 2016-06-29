@@ -166,7 +166,7 @@ void board_destroy(Board *bd) {
 
 void board_goto(Board *bd, int x, int y) {
 	(void)bd;
-	gotoxy(2+2*x, 1+y);
+	gotoxy(2 + 2*x, 1 + y);
 }
 
 void board_gotocursor(Board *bd) {
@@ -175,32 +175,32 @@ void board_gotocursor(Board *bd) {
 
 void board_shiftcursor(Board *bd, Direction dir) {
 	switch(dir) {
-	case UP: if(bd->cury>0)bd->cury--; else return; break;
-	case RIGHT: if(bd->curx<bd->w-1)bd->curx++; else return; break;
-	case DOWN: if(bd->cury<bd->h-1)bd->cury++; else return; break;
-	case LEFT: if(bd->curx>0)bd->curx--; else return; break;
+	case UP: if (bd->cury>0) bd->cury--; else return; break;
+	case RIGHT: if (bd->curx<bd->w-1) bd->curx++; else return; break;
+	case DOWN: if (bd->cury<bd->h-1) bd->cury++; else return; break;
+	case LEFT: if (bd->curx>0) bd->curx--; else return; break;
 	}
 	board_gotocursor(bd);
 }
 
 // doesn't gotoxy
 void board_drawcell(Board *bd, int x, int y) {
-	const Data *data=bd->data+(bd->w*y+x);
-	if(data->flag)putchar('#');
+	const Data *data = bd->data + (bd->w*y + x);
+	if (data->flag) putchar('#');
 	// else if(data->bomb)putchar(','); // DEBUG
-	else if(!data->open)putchar('.');
-	else if(data->count==0)putchar(' ');
+	else if (!data->open) putchar('.');
+	else if (data->count==0) putchar(' ');
 	else putchar('0'+data->count);
 }
 
 void board_draw(Board *bd) {
 	gotoxy(0, 0);
 	putchar('+');
-	for(int x=0;x<bd->w;x++)printf("--");
+	for (int x = 0; x < bd->w; x++) printf("--");
 	printf("-+\n");
-	for(int y=0;y<bd->h;y++) {
+	for (int y = 0; y < bd->h; y++) {
 		putchar('|');
-		for(int x=0;x<bd->w;x++) {
+		for(int x = 0; x < bd->w; x++) {
 			putchar(' ');
 			board_drawcell(bd, x, y);
 		}
@@ -216,34 +216,49 @@ void board_draw(Board *bd) {
 		putchar('\n');
 	}
 	putchar('+');
-	for(int x=0;x<bd->w;x++)printf("--");
+	for (int x=0;x<bd->w;x++) printf("--");
 	printf("-+\n");
 	board_gotocursor(bd);
 }
 
 void board_flag(Board *bd) {
-	Data *data=bd->data+(bd->w*bd->cury+bd->curx);
-	data->flag=!data->flag;
-	bd->nflags+=2*data->flag-1;
+	Data *data = bd->data+(bd->w*bd->cury + bd->curx);
+	data->flag = !data->flag;
+	bd->nflags += 2*data->flag - 1;
 }
 
 void board_flood(Board *bd, int x, int y) {
-	bd->data[bd->w*y+x].open=true;
+	bd->data[bd->w*y + x].open = true;
 	bd->nopen++;
-	if(bd->data[bd->w*y+x].count!=0)return;
-	if(x>0) {Data *d=bd->data+(bd->w*y+x-1);if(!d->open)board_flood(bd, x-1, y);}
-	if(y>0) {Data *d=bd->data+(bd->w*(y-1)+x);if(!d->open)board_flood(bd, x, y-1);}
-	if(x<bd->w-1) {Data *d=bd->data+(bd->w*y+x+1);if(!d->open)board_flood(bd, x+1, y);}
-	if(y<bd->h-1) {Data *d=bd->data+(bd->w*(y+1)+x);if(!d->open)board_flood(bd, x, y+1);}
+	if (bd->data[bd->w*y + x].count != 0) {
+		return;
+	}
+	if (x > 0) {
+		Data *d = bd->data+(bd->w*y+x-1);
+		if (!d->open) board_flood(bd, x-1, y);
+	}
+	if (y > 0) {
+		Data *d = bd->data+(bd->w*(y-1)+x);
+		if (!d->open) board_flood(bd, x, y-1);
+	}
+	if (x < bd->w-1) {
+		Data *d = bd->data+(bd->w*y+x+1);
+		if (!d->open) board_flood(bd, x+1, y);
+	}
+	if (y < bd->h-1) {
+		Data *d = bd->data+(bd->w*(y+1)+x);
+		if (!d->open) board_flood(bd, x, y+1);
+	}
 }
 
 bool board_open(Board *bd) {
-	Data *data=bd->data+(bd->w*bd->cury+bd->curx);
-	if(data->flag||data->open) {
+	Data *data = bd->data + (bd->w*bd->cury + bd->curx);
+	if (data->flag || data->open) {
 		prflush("\x07"); // bel
 		return false;
+	} else if (data->bomb) {
+		return true;
 	}
-	if(data->bomb)return true;
 	board_flood(bd, bd->curx, bd->cury);
 	return false;
 }
@@ -269,9 +284,11 @@ bool board_win(Board *bd) {
 void prompt_quit(int height) {
 	gotoxy(0, height);
 	prflush("Really quit? [y/N] ");
+
 	Key key;
 	getkey(&key);
-	if(key.type!=KCHAR||key.ch!='y') {
+
+	if(key.type != KCHAR || key.ch != 'y') {
 		prflush("\x1B[2K");
 	} else {
 		exit(0);
@@ -281,10 +298,12 @@ void prompt_quit(int height) {
 bool prompt_playagain(const char *msg, int height) {
 	gotoxy(0, height);
 	prflush("\x1B[7m%s\x1B[0m\nPlay again? [y/N] ", msg);
+
 	Key key;
 	getkey(&key);
+
 	prflush("\x1B[2K\x1B[A\x1B[2K");
-	if(key.type!=KCHAR||key.ch!='y') {
+	if(key.type != KCHAR || key.ch != 'y') {
 		return false;
 	} else {
 		return true;
@@ -300,7 +319,7 @@ void signalend(int sig) {
 int main(int argc, char **argv) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	srand(tv.tv_sec*1000000ULL+tv.tv_usec);
+	srand(tv.tv_sec*1000000ULL + tv.tv_usec);
 
 	initscreen();
 	atexit(endscreen);
@@ -329,9 +348,11 @@ int main(int argc, char **argv) {
 	while (!quit) {
 		board_draw(bd);
 		if (board_win(bd)) {
-			if (!prompt_playagain("You win!", height + 2))  break;
+			if (!prompt_playagain("You win!", height + 2)) {
+				break;
+			}
 			board_destroy(bd);
-			bd=board_make(width, height, nbombs);
+			bd = board_make(width, height, nbombs);
 			continue;
 		}
 		getkey(&key);
@@ -354,12 +375,12 @@ int main(int argc, char **argv) {
 			case ' ':
 				if (!board_open(bd)) break;
 				board_revealbombs(bd);
-				if (!prompt_playagain("BOOM!", height + 2))  {
+				if (!prompt_playagain("BOOM!", height + 2)) {
 					quit = true;
 					break;
 				}
 				board_destroy(bd);
-				bd=board_make(width, height, nbombs);
+				bd = board_make(width, height, nbombs);
 				break;
 			}
 			break;
