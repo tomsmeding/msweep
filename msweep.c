@@ -223,6 +223,7 @@ void board_draw(Board *bd) {
 
 void board_flag(Board *bd) {
 	Data *data = bd->data+(bd->w*bd->cury + bd->curx);
+	if (data->open) return;
 	data->flag = !data->flag;
 	bd->nflags += 2*data->flag - 1;
 }
