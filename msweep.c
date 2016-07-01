@@ -328,10 +328,6 @@ int main(int argc, char **argv) {
 	gettimeofday(&tv, NULL);
 	srand(tv.tv_sec*1000000ULL + tv.tv_usec);
 
-	initscreen();
-	atexit(endscreen);
-	signal(SIGINT, signalend);
-
 	int width = DEF_WIDTH;
 	int height = DEF_HEIGHT;
 	int nbombs = -1;
@@ -347,7 +343,14 @@ int main(int argc, char **argv) {
 		nbombs = .123 * width * height;
 	}
 
-	assert(nbombs <= width*height);
+	if (nbombs > width*height) {
+		fprintf(stdout, "nbombs (=%d) more than width * height (=%d)\n", nbombs, width*height);
+		return 1;
+	}
+
+	initscreen();
+	atexit(endscreen);
+	signal(SIGINT, signalend);
 
 	Board *bd=board_make(width, height, nbombs);
 	Key key;
