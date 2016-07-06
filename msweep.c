@@ -132,6 +132,7 @@ typedef struct Board{
 	Data *data;
 	int curx,cury;
 	int nbombs,nflags,nopen;
+	bool generated;
 } Board;
 
 Board* board_make(int w, int h, int nbombs) {
@@ -144,23 +145,10 @@ Board* board_make(int w, int h, int nbombs) {
 	bd->nbombs = nbombs;
 	bd->nflags = 0;
 	bd->nopen = 0;
+	bd->generated = false;
 
 	for (int i = 0; i < w*h; i++) {
 		data_init(bd->data+i);
-	}
-	int n = bd->nbombs;
-	while (n > 0) {
-		int pos=rand()%(w*h);
-		if(bd->data[pos].bomb) continue;
-		bd->data[pos].bomb = true;
-		bd->data[pos].count = 0;
-		n--;
-		for (int dy = pos<w?0:-1; dy<=(pos>=w*(h-1)?0:1); dy++)  {
-			for (int dx = pos%w==0?0:-1; dx<=(pos%w==w-1?0:1); dx++) {
-				if(dx == 0 && dy == 0) continue;
-				if(!bd->data[pos+w*dy+dx].bomb) bd->data[pos+w*dy+dx].count++;
-			}
-		}
 	}
 	return bd;
 }
@@ -258,8 +246,37 @@ void board_flood(Board *bd, int x, int y) {
 	}
 }
 
+void board_gen(Board *bd, int x, int y) {
+	int w = bd->w;
+	int h = bd->h;
+	int chosenpos = (bd->w*y + x);
+
+	int n = bd->nbombs;
+	while (n > 0) {
+		int pos = rand() % (w * h);
+		if (pos == chosenpos || bd->data[pos].bomb) {
+			continue;
+		}
+		bd->data[pos].bomb = true;
+		bd->data[pos].count = 0;
+		n--;
+		for (int dy = pos<w?0:-1; dy<=(pos>=w*(h-1)?0:1); dy++)  {
+			for (int dx = pos%w==0?0:-1; dx<=(pos%w==w-1?0:1); dx++) {
+				if (dx == 0 && dy == 0) continue;
+				if (!bd->data[pos+w*dy+dx].bomb) bd->data[pos+w*dy+dx].count++;
+			}
+		}
+	}
+
+	bd->generated = true;
+}
+
 bool board_open(Board *bd) {
 	Data *data = bd->data + (bd->w*bd->cury + bd->curx);
+	if (!bd->generated) {
+		board_gen(bd, bd->curx, bd->cury);
+	}
+
 	if (data->flag || data->open) {
 		prflush("\x07"); // bel
 		return false;
@@ -284,7 +301,7 @@ void board_revealbombs(Board *bd) {
 }
 
 bool board_win(Board *bd) {
-	return bd->nopen == bd->w*bd->h - bd->nbombs;
+	return bd->generated && bd->nopen == bd->w*bd->h - bd->nbombs;
 }
 
 
@@ -343,8 +360,8 @@ int main(int argc, char **argv) {
 		nbombs = .123 * width * height;
 	}
 
-	if (nbombs > width*height) {
-		fprintf(stdout, "nbombs (=%d) more than width * height (=%d)\n", nbombs, width*height);
+	if (nbombs >= width*height) {
+		fprintf(stdout, "nbombs (=%d) more than or equal to width * height (=%d)\n", nbombs, width*height);
 		return 1;
 	}
 
