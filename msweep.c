@@ -15,6 +15,10 @@
 
 #define prflush(...) do { printf(__VA_ARGS__); fflush(stdout); } while(0)
 
+inline void bel() {
+	prflush("\x07");
+}
+
 typedef enum Direction {
 	UP,
 	RIGHT,
@@ -217,7 +221,10 @@ void board_draw(Board *bd) {
 
 void board_flag(Board *bd) {
 	Data *data = bd->data+(bd->w*bd->cury + bd->curx);
-	if (data->open) return;
+	if (data->open) {
+		bel();
+		return;
+	}
 	data->flag = !data->flag;
 	bd->nflags += 2*data->flag - 1;
 }
@@ -278,7 +285,7 @@ bool board_open(Board *bd) {
 	}
 
 	if (data->flag || data->open) {
-		prflush("\x07"); // bel
+		bel();
 		return false;
 	} else if (data->bomb) {
 		return true;
