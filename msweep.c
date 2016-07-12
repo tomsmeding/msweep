@@ -311,34 +311,40 @@ bool board_win(Board *bd) {
 	return bd->generated && bd->nopen == bd->w*bd->h - bd->nbombs;
 }
 
+bool prompt(const char *msg, int height) {
+	gotoxy(0, height);
+	prflush("%s [y/N] ", msg);
+
+	bool res;
+	Key key;
+	while (true) {
+		getkey(&key);
+
+		if (key.ch == 'n') {
+			res = false;
+			break;
+		} else if (key.ch == 'y') {
+			res = true;
+			break;
+		}
+	}
+	prflush("\x1B[2K\x1B[A\x1B[2K");
+	return res;
+}
+
 
 void prompt_quit(int height) {
-	gotoxy(0, height);
-	prflush("Really quit? [y/N] ");
-
-	Key key;
-	getkey(&key);
-
-	if(key.type != KCHAR || key.ch != 'y') {
-		prflush("\x1B[2K");
-	} else {
+	if (prompt("Really quit?", height)) {
 		exit(0);
+	} else {
+		prflush("\x1B[2K");
 	}
 }
 
 bool prompt_playagain(const char *msg, int height) {
-	gotoxy(0, height);
-	prflush("\x1B[7m%s\x1B[0m\nPlay again? [y/N] ", msg);
-
-	Key key;
-	getkey(&key);
-
-	prflush("\x1B[2K\x1B[A\x1B[2K");
-	if(key.type != KCHAR || key.ch != 'y') {
-		return false;
-	} else {
-		return true;
-	}
+	char *str;
+	asprintf(&str, "\x1B[7m%s\x1B[0m\nPlay again?", msg);
+	return prompt(str, height);
 }
 
 void signalend(int sig) {
