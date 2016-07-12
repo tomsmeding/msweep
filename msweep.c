@@ -140,10 +140,10 @@ typedef struct Board{
 } Board;
 
 Board* board_make(int w, int h, int nbombs) {
-	Board *bd = malloc(sizeof(Board));
+	Board *bd = (Board *) malloc(sizeof(Board));
 	bd->w = w;
 	bd->h = h;
-	bd->data = malloc(w*h*sizeof(Data));
+	bd->data = (Data *) malloc(w * h * sizeof(Data));
 	bd->curx = 0;
 	bd->cury = 0;
 	bd->nbombs = nbombs;
@@ -152,7 +152,7 @@ Board* board_make(int w, int h, int nbombs) {
 	bd->generated = false;
 
 	for (int i = 0; i < w*h; i++) {
-		data_init(bd->data+i);
+		data_init(bd->data + i);
 	}
 	return bd;
 }
