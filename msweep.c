@@ -9,6 +9,7 @@
 #include <sys/time.h>
 #include <termios.h>
 #include <signal.h>
+#include <time.h>
 
 #define DEF_WIDTH (9)
 #define DEF_HEIGHT (9)
@@ -353,6 +354,13 @@ void signalend(int sig) {
 	exit(1);
 }
 
+void formatTime(char **dest, time_t seconds) {
+	int minutes = seconds / 60;
+	int hours = minutes / 60;
+	seconds = seconds % 60;
+	asprintf(dest, "%02d:%02d:%02ld", hours, minutes, seconds);
+}
+
 int main(int argc, char **argv) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -382,6 +390,7 @@ int main(int argc, char **argv) {
 	atexit(endscreen);
 	signal(SIGINT, signalend);
 
+	time_t startTime = time(NULL);
 	Board *bd=board_make(width, height, nbombs);
 	Key key;
 	bool quit = false;
@@ -389,9 +398,16 @@ int main(int argc, char **argv) {
 	while (!quit) {
 		board_draw(bd);
 		if (board_win(bd)) {
-			if (!prompt_playagain("You win!", height + 2)) {
+			char *timestamp;
+			formatTime(&timestamp, time(NULL) - startTime);
+
+			char *msg;
+			asprintf(&msg, "You win! (%s)", timestamp);
+
+			if (!prompt_playagain(msg, height + 2)) {
 				break;
 			}
+
 			board_destroy(bd);
 			bd = board_make(width, height, nbombs);
 			continue;
