@@ -321,7 +321,7 @@ bool prompt(const char *msg, int height) {
 	while (true) {
 		getkey(&key);
 
-		if (key.ch == 'n') {
+		if (key.ch == 'n' || key.ch == 10) {
 			res = false;
 			break;
 		} else if (key.ch == 'y') {
