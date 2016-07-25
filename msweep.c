@@ -137,7 +137,7 @@ typedef struct Board{
 	Data *data;
 	int curx,cury;
 	int nbombs,nflags,nopen;
-	bool generated;
+	time_t startTime;
 } Board;
 
 Board* board_make(int w, int h, int nbombs) {
@@ -150,7 +150,7 @@ Board* board_make(int w, int h, int nbombs) {
 	bd->nbombs = nbombs;
 	bd->nflags = 0;
 	bd->nopen = 0;
-	bd->generated = false;
+	bd->startTime = -1;
 
 	for (int i = 0; i < w*h; i++) {
 		data_init(bd->data + i);
@@ -276,12 +276,12 @@ void board_gen(Board *bd, int x, int y) {
 		}
 	}
 
-	bd->generated = true;
+	bd->startTime = time(NULL);
 }
 
 bool board_open(Board *bd) {
 	Data *data = bd->data + (bd->w*bd->cury + bd->curx);
-	if (!bd->generated) {
+	if (bd->startTime == -1) {
 		board_gen(bd, bd->curx, bd->cury);
 	}
 
@@ -309,7 +309,7 @@ void board_revealbombs(Board *bd) {
 }
 
 bool board_win(Board *bd) {
-	return bd->generated && bd->nopen == bd->w*bd->h - bd->nbombs;
+	return bd->startTime != -1 && bd->nopen == bd->w*bd->h - bd->nbombs;
 }
 
 bool prompt(const char *msg, int height) {
@@ -390,7 +390,6 @@ int main(int argc, char **argv) {
 	atexit(endscreen);
 	signal(SIGINT, signalend);
 
-	time_t startTime = time(NULL);
 	Board *bd=board_make(width, height, nbombs);
 	Key key;
 	bool quit = false;
@@ -399,7 +398,7 @@ int main(int argc, char **argv) {
 		board_draw(bd);
 		if (board_win(bd)) {
 			char *timestamp;
-			formatTime(&timestamp, time(NULL) - startTime);
+			formatTime(&timestamp, time(NULL) - bd->startTime);
 
 			char *msg;
 			asprintf(&msg, "You win! (%s)", timestamp);
